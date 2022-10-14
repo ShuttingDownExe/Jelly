@@ -58,4 +58,4 @@ class arp_guard:
                     print_output(f"Hostname of possible attacker found: {hostname}", FUNC)
                     logger.info(f"[SUCCESS] Hostname of possible attacker found: {hostname}")
 
-# update
+
