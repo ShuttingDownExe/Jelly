@@ -4,9 +4,6 @@ from Helpers.log_helper import logger
 from Helpers.output_helper import print_output, WARN, FUNC, INFO
 
 
-# from Helpers.sniff_helper import sniffer
-
-
 class ip_helper:
     blocklist_file = str()
     ip_list = []
@@ -55,6 +52,7 @@ def guessUnknownProtocol(protocols):
             protocol_guess_list.append(layer)
 
     return protocol_guess_list
+
 
 def TCP_block(ip):
     pass
@@ -117,7 +115,9 @@ def process_IP_packet(pkt):
     ip_helper.protocols = getProtocols(pkt)
 
     print_output(
-        "Packet Sniffed:\t Source: {0:20}->\t\tDestination: {1:20}=:=\t\t".format(ip_src, ip_dst)+"Layers Detected: {}".format(ip_helper.protocols),
+        "Packet Sniffed:\t Source: {0:20}->\t\tDestination: {1:20}=:=\t\t".format(ip_src,
+                                                                                  ip_dst) + "Layers Detected: {}".format(
+            ip_helper.protocols),
         INFO)
 
     unknown_protocol_guess = guessUnknownProtocol(ip_helper.protocols)
