@@ -89,6 +89,7 @@ def ICMP_block(ip):
 
 def ip_blocker(pkt, ip, protocol_guess):
     print_output("Blocking...", WARN)
+    logger.info("[STARTED] IP based Blocker")
     if TCP in pkt:
         TCP_block(ip)
         print_output("Blocked: No action needed", FUNC)
