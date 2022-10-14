@@ -116,8 +116,7 @@ def process_IP_packet(pkt):
 
     print_output(
         "Packet Sniffed:\t Source: {0:20}->\t\tDestination: {1:20}=:=\t\t".format(ip_src, ip_dst) +
-        "Layers Detected: {}".format(ip_helper.protocols),
-        INFO)
+        "Layers Detected: {}".format(ip_helper.protocols), INFO)
 
     unknown_protocol_guess = guessUnknownProtocol(ip_helper.protocols)
 
