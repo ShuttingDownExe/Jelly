@@ -29,12 +29,32 @@ class ip_helper:
             print_output("Blocklisted IP's loaded", INFO)
 
 
-def expand(x):
-    yield x.name
-    while x.payload:
-        x = x.payload
-        yield x.name
+def extract(pkt):
+    counter = 0
+    while True:
+        layer = pkt.getlayer(counter)
+        if layer is None:
+            break
 
+        yield layer
+        counter += 1
+
+
+def getProtocols(pkt):
+    return_list = []
+    for layer in list(extract(pkt)):
+        return_list.append(layer.name)
+
+    return [*set(return_list)]
+
+
+def guessUnknownProtocol(protocols):
+    protocol_guess_list = []
+    for layer in protocols:
+        if layer not in ["UDP", "TCP", "ICMP"]:
+            protocol_guess_list.append(layer)
+
+    return protocol_guess_list
 
 def TCP_block(ip):
     pass
@@ -69,7 +89,7 @@ def ICMP_block(ip):
     """
 
 
-def ip_blocker(pkt, ip):
+def ip_blocker(pkt, ip, protocol_guess):
     print_output("Blocking...", WARN)
     if TCP in pkt:
         TCP_block(ip)
@@ -85,23 +105,30 @@ def ip_blocker(pkt, ip):
         logger.warn(f"[BLOCKED] Blocklisted IP Address:   IP: {ip} Protocol: ICMP")
     else:
         print_output(f"UNKNOWN PROTOCOL: PLEASE MANUALLY BLOCK IP -> {ip}", WARN)
-        print_output(f"PROTOCOL GUESS: {ip_helper.protocols[2]}", WARN)
+        print_output(f"PROTOCOL GUESS: {protocol_guess}", WARN)
         logger.critical(f"[BLOCKER ERROR] UNABLE TO BLOCK IP (Unknown Protocol):    IP: {ip} Protocol Guess: "
-                        f"{ip_helper.protocols[2]}")
+                        f"{protocol_guess}")
 
 
 def process_IP_packet(pkt):
     ip_src = pkt[IP].src
     ip_dst = pkt[IP].dst
-    ip_helper.protocols = list(expand(pkt))
-    print_output("Packet Sniffed -> Source: {0:20}\tDestination: {1}\t".format(ip_src, ip_dst), INFO)
+
+    ip_helper.protocols = getProtocols(pkt)
+
+    print_output(
+        "Packet Sniffed:\t Source: {0:20}->\t\tDestination: {1:20}=:=\t\t".format(ip_src, ip_dst)+"Layers Detected: {}".format(ip_helper.protocols),
+        INFO)
+
+    unknown_protocol_guess = guessUnknownProtocol(ip_helper.protocols)
+
     if str(ip_src) in ip_helper.ip_list:
         print_output(f"PACKET  FROM  BLOCKLISTED IP DETECTED  : -->{ip_src}<--", WARN)
         logger.warn(f"[DETECTED] Packet  FROM  malicious IP: {ip_src} ")
-        ip_blocker(pkt, str(ip_src))
+        ip_blocker(pkt, str(ip_src), unknown_protocol_guess)
     elif str(ip_dst) in ip_helper.ip_list:
         print_output(f"PACKET   TO   BLOCKLISTED IP DETECTED  : -->{ip_src}<--", WARN)
         logger.warn(f"[DETECTED] Packet   TO   malicious IP: {ip_src} ")
-        ip_blocker(pkt, str(ip_dst))
+        ip_blocker(pkt, str(ip_dst), unknown_protocol_guess)
     else:
-        return -1
+        pass
