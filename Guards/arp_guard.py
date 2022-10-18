@@ -2,6 +2,7 @@ import netifaces
 from scapy.layers.dhcp import DHCP, DHCPOptions
 from scapy.layers.inet import IP
 from scapy.layers.l2 import ARP, Ether
+from scapy.sendrecv import sr
 from scapy.utils import rdpcap
 
 from Helpers.output_helper import print_output, WARN, FUNC, NOTF
@@ -29,6 +30,7 @@ class arp_guard:
         if curr_pkt_MAC == arp_guard.prev_pkt_MAC and curr_pkt_IP != arp_guard.prev_pkt_IP:
             print_output(f"POSSIBLE INTRUSION ATTEMPT -> Type: ARP SPOOFING", WARN)
             logger.warn(f"[DETECTED] POSSIBLE ARP SPOOFING: ")
+            arp_guard.try_to_get_name(curr_pkt_IP)
 
     @staticmethod
     def try_to_get_name(ip):
@@ -49,7 +51,7 @@ class arp_guard:
         if mac_lookup == "":
             print_output("IP of possible attacker could not be found in pcap logs", WARN)
             logger.warn("[FAILED] Hostname could not be found: IP address missing from PCAP")
-            return ""
+            return
 
         for pkt in pkts:
             if DHCP in pkt:
@@ -58,4 +60,7 @@ class arp_guard:
                     print_output(f"Hostname of possible attacker found: {hostname}", FUNC)
                     logger.info(f"[SUCCESS] Hostname of possible attacker found: {hostname}")
 
+    @staticmethod
+    def arp_fix(def_gateway_ip, host_ip):
+        results, unanswered = sr(ARP(op=ARP.who_has, psrc=def_gateway_ip, pdst=host_ip))
 
