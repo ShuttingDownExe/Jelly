@@ -2,9 +2,8 @@ import netifaces
 from scapy.layers.dhcp import DHCP, DHCPOptions
 from scapy.layers.inet import IP
 from scapy.layers.l2 import ARP, Ether
-from scapy.sendrecv import sr, sendp, srp
+from scapy.sendrecv import srp
 from scapy.utils import rdpcap
-import scapy.all as scapy
 from Helpers.output_helper import print_output, WARN, FUNC, NOTF
 from Helpers.log_helper import logger
 
@@ -80,8 +79,6 @@ class arp_guard:
 
         pkt.show()
 
-        #srp(pkt)
-
-
+        # srp(pkt)
 
         pass
