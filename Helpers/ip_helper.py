@@ -6,24 +6,7 @@ from Helpers.output_helper import print_output, WARN, FUNC, INFO
 
 class ip_helper:
     blocklist_file = str()
-    ip_list = []
     protocols = []
-
-    def __init__(self, blocklist):
-        self.blocklist_file = blocklist
-        try:
-            File = open(str(self.blocklist_file), "r")
-            data = File.read()
-            read_list = data.split("\n")
-            sep = "/"
-            data = [x.split(sep, 1)[0] for x in read_list]
-            self.ip_list = data[33:]
-            File.close()
-        except:
-            print_output("IP blocklist file missing", WARN)
-            logger.error("[SNIFFER ERROR] UNABLE TO FIND BLOCKLIST FILE ")
-        else:
-            print_output("Blocklisted IP's loaded", INFO)
 
 
 def extract(pkt):
@@ -55,6 +38,7 @@ def guessUnknownProtocol(protocols):
 
 
 def TCP_block(ip):
+    print_output(ip + " Blocked", WARN)
     pass
     """
     result = subprocess.run('iptables -C INPUT -p tcp -s ' + ip + ' -j REJECT --reject-with tcp-reset',
@@ -66,6 +50,7 @@ def TCP_block(ip):
 
 
 def UDP_block(ip):
+    print_output(ip + " Blocked", WARN)
     pass
     """
     result = subprocess.run('iptables -C INPUT -p udp -s ' + ip + ' -j REJECT --reject-with icmp-port-unreachable',
@@ -77,6 +62,7 @@ def UDP_block(ip):
 
 
 def ICMP_block(ip):
+    print_output(ip + " Blocked", WARN)
     pass
     """
     result = subprocess.run('iptables -C INPUT -p icmp -s ' + ip + ' -j REJECT --reject-with icmp-host-unreachable',
@@ -109,7 +95,7 @@ def ip_blocker(pkt, ip, protocol_guess):
                         f"{protocol_guess}")
 
 
-def process_IP_packet(pkt):
+def process_IP_packet(pkt, ip_list):
     ip_src = pkt[IP].src
     ip_dst = pkt[IP].dst
 
@@ -121,11 +107,11 @@ def process_IP_packet(pkt):
 
     unknown_protocol_guess = guessUnknownProtocol(ip_helper.protocols)
 
-    if str(ip_src) in ip_helper.ip_list:
+    if str(ip_src) in ip_list:
         print_output(f"PACKET  FROM  BLOCKLISTED IP DETECTED  : -->{ip_src}<--", WARN)
         logger.warn(f"[DETECTED] Packet  FROM  malicious IP: {ip_src} ")
         ip_blocker(pkt, str(ip_src), unknown_protocol_guess)
-    elif str(ip_dst) in ip_helper.ip_list:
+    elif str(ip_dst) in ip_list:
         print_output(f"PACKET   TO   BLOCKLISTED IP DETECTED  : -->{ip_src}<--", WARN)
         logger.warn(f"[DETECTED] Packet   TO   malicious IP: {ip_src} ")
         ip_blocker(pkt, str(ip_dst), unknown_protocol_guess)
