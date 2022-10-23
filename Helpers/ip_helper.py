@@ -1,4 +1,5 @@
 from scapy.layers.inet import TCP, UDP, ICMP, IP
+import subprocess
 
 from Helpers.log_helper import logger
 from Helpers.output_helper import print_output, WARN, FUNC, INFO
@@ -9,21 +10,22 @@ class ip_helper:
     ip_list = []
     protocols = []
 
-    def __init__(self, blocklist):
-        self.blocklist_file = blocklist
+    def getBlocklist():
         try:
-            File = open(str(self.blocklist_file), "r")
+            File = open(str(blocklist_file), "r")
             data = File.read()
-            read_list = data.split("\n")
-            sep = "/"
-            data = [x.split(sep, 1)[0] for x in read_list]
-            self.ip_list = data[33:]
-            File.close()
-        except:
-            print_output("IP blocklist file missing", WARN)
-            logger.error("[SNIFFER ERROR] UNABLE TO FIND BLOCKLIST FILE ")
-        else:
-            print_output("Blocklisted IP's loaded", INFO)
+        read_list = data.split("\n")
+        sep = "/"
+        data = [x.split(sep, 1)[0] for x in read_list]
+        ip_list = data[33:]
+        File.close()
+
+    except:
+    print_output("IP blocklist file missing", WARN)
+    logger.error("[SNIFFER ERROR] UNABLE TO FIND BLOCKLIST FILE ")
+
+else:
+print_output("Blocklisted IP's loaded", INFO)
 
 
 def extract(pkt):
@@ -55,36 +57,27 @@ def guessUnknownProtocol(protocols):
 
 
 def TCP_block(ip):
-    pass
-    """
     result = subprocess.run('iptables -C INPUT -p tcp -s ' + ip + ' -j REJECT --reject-with tcp-reset',
                             capture_output=True, text=True, shell=True)
     if 'iptables: Bad rule' in result.stderr:
         result = subprocess.run('iptables -I INPUT -p tcp -s ' + ip + ' -j REJECT --reject-with tcp-reset',
                                 capture_output=True, text=True, shell=True)
-    """
 
 
 def UDP_block(ip):
-    pass
-    """
     result = subprocess.run('iptables -C INPUT -p udp -s ' + ip + ' -j REJECT --reject-with icmp-port-unreachable',
                             capture_output=True, text=True, shell=True)
     if 'iptables: Bad rule' in result.stderr:
         result = subprocess.run('iptables -I INPUT -p udp -s ' + ip + ' -j REJECT --reject-with icmp-port-unreachable',
                                 capture_output=True, text=True, shell=True)
-    """
 
 
 def ICMP_block(ip):
-    pass
-    """
     result = subprocess.run('iptables -C INPUT -p icmp -s ' + ip + ' -j REJECT --reject-with icmp-host-unreachable',
                             capture_output=True, text=True, shell=True)
     if 'iptables: Bad rule' in result.stderr:
         result = subprocess.run('iptables -I INPUT -p icmp -s ' + ip + ' -j REJECT --reject-with icmp-host-unreachable',
                                 capture_output=True, text=True, shell=True)
-    """
 
 
 def ip_blocker(pkt, ip, protocol_guess):
@@ -110,6 +103,8 @@ def ip_blocker(pkt, ip, protocol_guess):
 
 
 def process_IP_packet(pkt):
+    ip_helper("firehol_level1.netset")
+
     ip_src = pkt[IP].src
     ip_dst = pkt[IP].dst
 
@@ -120,7 +115,6 @@ def process_IP_packet(pkt):
         "Layers Detected: {}".format(ip_helper.protocols), INFO)
 
     unknown_protocol_guess = guessUnknownProtocol(ip_helper.protocols)
-
     if str(ip_src) in ip_helper.ip_list:
         print_output(f"PACKET  FROM  BLOCKLISTED IP DETECTED  : -->{ip_src}<--", WARN)
         logger.warn(f"[DETECTED] Packet  FROM  malicious IP: {ip_src} ")

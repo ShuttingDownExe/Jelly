@@ -4,7 +4,7 @@ from scapy.layers.l2 import ARP
 from scapy.utils import wrpcap
 
 from Helpers.http_helper import process_HTTP_packet
-from Helpers.ip_helper import process_IP_packet
+from Helpers.ip_helper import process_IP_packet, ip_helper
 
 from Guards.arp_guard import arp_guard
 
