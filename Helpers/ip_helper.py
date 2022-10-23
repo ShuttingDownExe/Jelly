@@ -1,3 +1,5 @@
+import subprocess
+
 from scapy.layers.inet import TCP, UDP, ICMP, IP
 
 from Helpers.log_helper import logger
@@ -38,39 +40,27 @@ def guessUnknownProtocol(protocols):
 
 
 def TCP_block(ip):
-    print_output(ip + " Blocked", WARN)
-    pass
-    """
     result = subprocess.run('iptables -C INPUT -p tcp -s ' + ip + ' -j REJECT --reject-with tcp-reset',
                             capture_output=True, text=True, shell=True)
     if 'iptables: Bad rule' in result.stderr:
         result = subprocess.run('iptables -I INPUT -p tcp -s ' + ip + ' -j REJECT --reject-with tcp-reset',
                                 capture_output=True, text=True, shell=True)
-    """
 
 
 def UDP_block(ip):
-    print_output(ip + " Blocked", WARN)
-    pass
-    """
     result = subprocess.run('iptables -C INPUT -p udp -s ' + ip + ' -j REJECT --reject-with icmp-port-unreachable',
                             capture_output=True, text=True, shell=True)
     if 'iptables: Bad rule' in result.stderr:
         result = subprocess.run('iptables -I INPUT -p udp -s ' + ip + ' -j REJECT --reject-with icmp-port-unreachable',
                                 capture_output=True, text=True, shell=True)
-    """
 
 
 def ICMP_block(ip):
-    print_output(ip + " Blocked", WARN)
-    pass
-    """
     result = subprocess.run('iptables -C INPUT -p icmp -s ' + ip + ' -j REJECT --reject-with icmp-host-unreachable',
                             capture_output=True, text=True, shell=True)
     if 'iptables: Bad rule' in result.stderr:
         result = subprocess.run('iptables -I INPUT -p icmp -s ' + ip + ' -j REJECT --reject-with icmp-host-unreachable',
                                 capture_output=True, text=True, shell=True)
-    """
 
 
 def ip_blocker(pkt, ip, protocol_guess):
