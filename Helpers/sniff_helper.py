@@ -16,12 +16,12 @@ class sniffer_helper:
 
     def __init__(self):
         try:
-            File = open("firehol_level1.netset", "r")
+            File = open("Helpers/firehol_level1.netset", "r")
             data = File.read()
             read_list = data.split("\n")
             sep = "/"
             data = [x.split(sep, 1)[0] for x in read_list]
-            self.ip_list = data[33:]
+            sniffer_helper.ip_list = data[33:]
             File.close()
         except:
             print_output("IP blocklist file missing", WARN)
@@ -35,7 +35,6 @@ class sniffer_helper:
 
         if ARP in pkt:
             arp_guard.spoof_guard(pkt)
-
         if IP in pkt:
             process_IP_packet(pkt, sniffer_helper.ip_list)
 
