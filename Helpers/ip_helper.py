@@ -1,5 +1,6 @@
-from scapy.layers.inet import TCP, UDP, ICMP, IP
 import subprocess
+
+from scapy.layers.inet import TCP, UDP, ICMP, IP
 
 from Helpers.log_helper import logger
 from Helpers.output_helper import print_output, WARN, FUNC, INFO
@@ -7,25 +8,7 @@ from Helpers.output_helper import print_output, WARN, FUNC, INFO
 
 class ip_helper:
     blocklist_file = str()
-    ip_list = []
     protocols = []
-
-    def getBlocklist():
-        try:
-            File = open(str(blocklist_file), "r")
-            data = File.read()
-        read_list = data.split("\n")
-        sep = "/"
-        data = [x.split(sep, 1)[0] for x in read_list]
-        ip_list = data[33:]
-        File.close()
-
-    except:
-    print_output("IP blocklist file missing", WARN)
-    logger.error("[SNIFFER ERROR] UNABLE TO FIND BLOCKLIST FILE ")
-
-else:
-print_output("Blocklisted IP's loaded", INFO)
 
 
 def extract(pkt):
@@ -102,9 +85,7 @@ def ip_blocker(pkt, ip, protocol_guess):
                         f"{protocol_guess}")
 
 
-def process_IP_packet(pkt):
-    ip_helper("firehol_level1.netset")
-
+def process_IP_packet(pkt, ip_list):
     ip_src = pkt[IP].src
     ip_dst = pkt[IP].dst
 
@@ -115,11 +96,12 @@ def process_IP_packet(pkt):
         "Layers Detected: {}".format(ip_helper.protocols), INFO)
 
     unknown_protocol_guess = guessUnknownProtocol(ip_helper.protocols)
-    if str(ip_src) in ip_helper.ip_list:
+
+    if str(ip_src) in ip_list:
         print_output(f"PACKET  FROM  BLOCKLISTED IP DETECTED  : -->{ip_src}<--", WARN)
         logger.warn(f"[DETECTED] Packet  FROM  malicious IP: {ip_src} ")
         ip_blocker(pkt, str(ip_src), unknown_protocol_guess)
-    elif str(ip_dst) in ip_helper.ip_list:
+    elif str(ip_dst) in ip_list:
         print_output(f"PACKET   TO   BLOCKLISTED IP DETECTED  : -->{ip_src}<--", WARN)
         logger.warn(f"[DETECTED] Packet   TO   malicious IP: {ip_src} ")
         ip_blocker(pkt, str(ip_dst), unknown_protocol_guess)

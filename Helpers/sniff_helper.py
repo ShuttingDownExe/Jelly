@@ -7,20 +7,36 @@ from Helpers.http_helper import process_HTTP_packet
 from Helpers.ip_helper import process_IP_packet, ip_helper
 
 from Guards.arp_guard import arp_guard
+from Helpers.log_helper import logger
+from Helpers.output_helper import print_output, WARN, INFO
 
 
-class sniffer:
-    pass
+class sniffer_helper:
+    ip_list = []
 
+    def __init__(self):
+        try:
+            File = open("Helpers/firehol_level1.netset", "r")
+            data = File.read()
+            read_list = data.split("\n")
+            sep = "/"
+            data = [x.split(sep, 1)[0] for x in read_list]
+            sniffer_helper.ip_list = data[33:]
+            File.close()
+        except:
+            print_output("IP blocklist file missing", WARN)
+            logger.error("[SNIFFER ERROR] UNABLE TO FIND BLOCKLIST FILE ")
+        else:
+            print_output("Blocklisted IP's loaded", INFO)
 
-def sniffer_func(pkt):
-    wrpcap('PCAP_LOG.pcap', pkt, append=True)
+    @staticmethod
+    def sniffer_func(pkt):
+        wrpcap('PCAP_LOG.pcap', pkt, append=True)
 
-    if ARP in pkt:
-        arp_guard.spoof_guard(pkt)
+        if ARP in pkt:
+            arp_guard.spoof_guard(pkt)
+        if IP in pkt:
+            process_IP_packet(pkt, sniffer_helper.ip_list)
 
-    if IP in pkt:
-        process_IP_packet(pkt)
-
-    if pkt.haslayer(HTTPRequest):
-        process_HTTP_packet(pkt)
+        if pkt.haslayer(HTTPRequest):
+            process_HTTP_packet(pkt)

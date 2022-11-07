@@ -1,0 +1,6 @@
+2022-10-23 14:07:16,816 [DETECTED] Packet  FROM  malicious IP: 192.168.0.108 
+2022-10-23 14:07:16,816 [BLOCKED] Blocklisted IP Address:   IP: 192.168.0.108 Protocol: ICMP
+2022-10-23 14:07:21,531 [DETECTED] Packet  FROM  malicious IP: 192.168.0.108 
+2022-10-23 14:07:21,531 [BLOCKED] Blocklisted IP Address:   IP: 192.168.0.108 Protocol: ICMP
+2022-10-23 14:07:26,530 [DETECTED] Packet  FROM  malicious IP: 192.168.0.108 
+2022-10-23 14:07:26,530 [BLOCKED] Blocklisted IP Address:   IP: 192.168.0.108 Protocol: ICMP
