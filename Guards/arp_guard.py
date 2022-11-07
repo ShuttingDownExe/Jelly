@@ -1,3 +1,6 @@
+import os
+import re
+
 import netifaces
 from scapy.layers.dhcp import DHCP, DHCPOptions
 from scapy.layers.inet import IP
@@ -9,28 +12,64 @@ from Helpers.log_helper import logger
 
 
 class arp_guard:
-    default_gateway_IP = ""
-
-    my_IP = ""
-    my_MAC = ""
-
-    prev_pkt_MAC = ""
-    prev_pkt_IP = ""
-
     def __init__(self):
         gws = netifaces.gateways()
         self.default_gateway_IP = str(gws['default'][netifaces.AF_INET][0])
         self.my_IP = str()
 
     @staticmethod
-    def spoof_guard(pkt):
-        curr_pkt_MAC = pkt[ARP].hwsrc
-        curr_pkt_IP = pkt[ARP].psrc
+    def getMac(ip):
+        packet = Ether(dst='ff:ff:ff:ff:ff:ff') / ARP(pdst=ip)
+        result = srp(packet, timeout=3, verbose=False)[0]
+        return result[0][1].hwsrc
 
-        if curr_pkt_MAC == arp_guard.prev_pkt_MAC and curr_pkt_IP != arp_guard.prev_pkt_IP:
-            print_output(f"POSSIBLE INTRUSION ATTEMPT -> Type: ARP SPOOFING", WARN)
-            logger.warn(f"[DETECTED] POSSIBLE ARP SPOOFING: ")
-            arp_guard.try_to_get_name(curr_pkt_IP)
+    @staticmethod
+    def getMacTable():
+        ret = []
+        commandOutput = os.popen('arp -a').read()
+
+        lines = commandOutput.split('\n')
+        lines = [e for e in lines if (not 'ress' in e)]
+
+        ACTIVE_IFACE = None
+        ID = 1
+
+        for line in lines:
+
+            if line == '':
+                continue
+
+            if line[:9] == 'Interface':
+                ACTIVE_IFACE = line.split(' ')[1]
+
+            else:
+                if ACTIVE_IFACE is None:
+                    continue
+                line = re.sub(r' +', r' ', line).strip()
+                IPV4, PHYSICAL, CACHE_TYPE = line.split(' ')
+                CACHE_TYPE = 'dynamic' if CACHE_TYPE[:4] == 'dyna' else 'static'
+                ret.append([ID, ACTIVE_IFACE, IPV4, PHYSICAL, CACHE_TYPE])
+                ID += 1
+
+            return ret
+
+    @staticmethod
+    def spoof_guard(pkt):
+        if pkt[ARP].op == 2:
+            try:
+                real_mac = arp_guard.getMac(pkt[ARP].psrc)
+                resp_mac = pkt[ARP].hwsrc
+
+                if real_mac != resp_mac:
+                    print_output(f"POSSIBLE ARP SPOOFING ATTACK:-  Source Mac:{real_mac}    Fake Mac:{resp_mac}", WARN)
+                    logger.warn(
+                        f"[DETECTED] POSSIBLE ARP SPOOFING ATTACK:-   Source Mac:{real_mac}    Fake Mac:{resp_mac}")
+
+                    arp_guard.try_to_get_name(pkt[ARP].psrc)
+
+                    arp_guard.arp_fix()
+            except IndexError:
+                pass
 
     @staticmethod
     def try_to_get_name(ip):
@@ -50,7 +89,7 @@ class arp_guard:
 
         if mac_lookup == "":
             print_output("IP of possible attacker could not be found in pcap logs", WARN)
-            logger.warn("[FAILED] Hostname could not be found: IP address missing from PCAP")
+            logger.warn("[FAILED] Hostname could not be found: IP address missing from PCAP logs")
             return
 
         for pkt in pkts:
@@ -61,7 +100,7 @@ class arp_guard:
                     logger.info(f"[SUCCESS] Hostname of possible attacker found: {hostname}")
 
     @staticmethod
-    def arp_fix(def_gateway_ip, host_ip):
+    def arp_fix():
         pkt = Ether() / ARP()
         # --->[ Ether ]<--- #
         pkt[Ether].dst = "ff:ff:ff:ff:ff:ff"
