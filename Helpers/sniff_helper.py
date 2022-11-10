@@ -31,6 +31,7 @@ class sniffer_helper:
 
     @staticmethod
     def sniffer_func(pkt):
+        logger.info("[SNIFFER] Packet analysis started")
         wrpcap('PCAP_LOG.pcap', pkt, append=True)
 
         if ARP in pkt:

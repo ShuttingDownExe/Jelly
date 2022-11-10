@@ -1,12 +1,13 @@
-import os
-import re
-
 import netifaces
+
 from scapy.layers.dhcp import DHCP, DHCPOptions
 from scapy.layers.inet import IP
 from scapy.layers.l2 import ARP, Ether
 from scapy.sendrecv import srp
 from scapy.utils import rdpcap
+
+from python_arptable import ARPTABLE
+
 from Helpers.output_helper import print_output, WARN, FUNC, NOTF
 from Helpers.log_helper import logger
 
@@ -24,34 +25,10 @@ class arp_guard:
         return result[0][1].hwsrc
 
     @staticmethod
-    def getMacTable():
-        ret = []
-        commandOutput = os.popen('arp -a').read()
+    def getMacTable(interface):
+        interfaceDict = next(item for item in ARPTABLE if item['Device'] == 'ens33')
 
-        lines = commandOutput.split('\n')
-        lines = [e for e in lines if (not 'ress' in e)]
 
-        ACTIVE_IFACE = None
-        ID = 1
-
-        for line in lines:
-
-            if line == '':
-                continue
-
-            if line[:9] == 'Interface':
-                ACTIVE_IFACE = line.split(' ')[1]
-
-            else:
-                if ACTIVE_IFACE is None:
-                    continue
-                line = re.sub(r' +', r' ', line).strip()
-                IPV4, PHYSICAL, CACHE_TYPE = line.split(' ')
-                CACHE_TYPE = 'dynamic' if CACHE_TYPE[:4] == 'dyna' else 'static'
-                ret.append([ID, ACTIVE_IFACE, IPV4, PHYSICAL, CACHE_TYPE])
-                ID += 1
-
-            return ret
 
     @staticmethod
     def spoof_guard(pkt):
@@ -101,23 +78,6 @@ class arp_guard:
 
     @staticmethod
     def arp_fix():
-        pkt = Ether() / ARP()
-        # --->[ Ether ]<--- #
-        pkt[Ether].dst = "ff:ff:ff:ff:ff:ff"
-        pkt[Ether].src = "d8:c0:a6:38:c7:65"
-        # --->[ ARP ]<--- #
-        pkt[ARP].hwtype = 0x1
-        pkt[ARP].ptype = "IPv4"
-        pkt[ARP].hwlen = 6
-        pkt[ARP].plen = 4
-        pkt[ARP].op = 1
-        pkt[ARP].hwsrc = "d8:c0:a6:38:c7:65"
-        pkt[ARP].hwdst = "00:00:00:00:00:00"
-        pkt[ARP].psrc = "192.168.0.103"
-        pkt[ARP].pdst = "192.168.0.1"
-
-        pkt.show()
-
-        # srp(pkt)
+        
 
         pass
