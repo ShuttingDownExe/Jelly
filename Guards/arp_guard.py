@@ -50,7 +50,7 @@ class arp_guard:
 
     @staticmethod
     def try_to_get_name(ip):
-        pkts = rdpcap("../PCAP_LOG.pcap")
+        pkts = rdpcap("PCAP_LOG.pcap")
         mac_lookup = ""
 
         print_output("Started Hostname guess function", NOTF)
@@ -78,6 +78,6 @@ class arp_guard:
 
     @staticmethod
     def arp_fix():
-        
+
 
         pass
