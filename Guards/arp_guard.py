@@ -102,6 +102,3 @@ class arp_guard:
             subprocess.run('arp -d '+ip)
 
 
-
-
-        pass
