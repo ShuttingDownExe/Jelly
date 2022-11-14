@@ -1,3 +1,6 @@
+import subprocess
+from itertools import groupby
+
 import netifaces
 
 from scapy.layers.dhcp import DHCP, DHCPOptions
@@ -19,6 +22,11 @@ class arp_guard:
         self.my_IP = str()
 
     @staticmethod
+    def is_all_equal(iterable):
+        g = groupby(iterable)
+        return next(g, True) and not next(g, False)
+
+    @staticmethod
     def getMac(ip):
         packet = Ether(dst='ff:ff:ff:ff:ff:ff') / ARP(pdst=ip)
         result = srp(packet, timeout=3, verbose=False)[0]
@@ -26,9 +34,8 @@ class arp_guard:
 
     @staticmethod
     def getMacTable(interface):
-        interfaceDict = next(item for item in ARPTABLE if item['Device'] == 'ens33')
-
-
+        interfaceDict = next(item for item in ARPTABLE if item['Device'] == interface)
+        return interfaceDict
 
     @staticmethod
     def spoof_guard(pkt):
@@ -44,7 +51,7 @@ class arp_guard:
 
                     arp_guard.try_to_get_name(pkt[ARP].psrc)
 
-                    arp_guard.arp_fix()
+                    arp_guard.arp_fix(pkt[ARP].psrc)
             except IndexError:
                 pass
 
@@ -77,7 +84,24 @@ class arp_guard:
                     logger.info(f"[SUCCESS] Hostname of possible attacker found: {hostname}")
 
     @staticmethod
-    def arp_fix():
+    def arp_fix(ip):
+        ip_entries = []
+        arp_table = arp_guard.getMacTable('ens33')
+        for i in arp_table:
+            if i['IP address'] == ip:
+                ip_entries = ip_entries.append(i)
+        ip_macs = []
+        for i in ip_entries:
+            ip_macs = ip_macs.append(i['HW address'])
+
+        if not arp_guard.is_all_equal(ip_macs):
+            print_output(f"ARP CACHE POISONED", WARN)
+            logger.critical(f"[ARP ATTACK] ARP HAS BEEN POISONED")
+
+            print_output(f"-----FIXING-----", FUNC)
+            subprocess.run('arp -d '+ip)
+
+
 
 
         pass
