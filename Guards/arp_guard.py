@@ -2,17 +2,12 @@ import subprocess
 from itertools import groupby
 
 import netifaces
-
-from scapy.layers.dhcp import DHCP, DHCPOptions
-from scapy.layers.inet import IP
+from python_arptable import ARPTABLE
 from scapy.layers.l2 import ARP, Ether
 from scapy.sendrecv import srp
-from scapy.utils import rdpcap
 
-from python_arptable import ARPTABLE
-
-from Helpers.output_helper import print_output, WARN, FUNC, NOTF
 from Helpers.log_helper import logger
+from Helpers.output_helper import print_output, WARN, FUNC
 
 
 class arp_guard:
