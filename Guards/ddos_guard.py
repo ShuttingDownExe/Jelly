@@ -8,4 +8,4 @@ def isBadPkt(pkt):
     return bad
 
 def flood_guard(pkt):
-    count = Counter()
+    count = Counter( )
