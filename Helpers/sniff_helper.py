@@ -4,9 +4,9 @@ from scapy.layers.l2 import ARP
 from scapy.utils import wrpcap
 
 from Helpers.http_helper import process_HTTP_packet
-from Helpers.ip_helper import process_IP_packet, ip_helper
+from Helpers.ip_helper import process_IP_packet
 
-from Guards.arp_guard import arp_guard
+from Guards.arp_guard import spoof_guard
 from Helpers.log_helper import logger
 from Helpers.output_helper import print_output, WARN, INFO
 
@@ -35,7 +35,7 @@ class sniffer_helper:
         wrpcap('PCAP_LOG.pcap', pkt, append=True)
 
         if ARP in pkt:
-            arp_guard.spoof_guard(pkt)
+            spoof_guard(pkt)
         if IP in pkt:
             process_IP_packet(pkt, sniffer_helper.ip_list)
 
