@@ -6,7 +6,7 @@ from scapy.layers.l2 import ARP, Ether
 from scapy.sendrecv import srp
 
 from Helpers.log_helper import logger
-from Helpers.output_helper import print_output, WARN, FUNC
+from Helpers.output_helper import print_output, WARN, FUNC, INFO
 
 
 def is_all_equal(iterable):
@@ -50,4 +50,5 @@ def arp_fix(ip):
         logger.critical(f"[ARP ATTACK] ARP HAS BEEN POISONED")
 
     result = subprocess.run('arp -d ' + ip, capture_output=True, text=True, shell=True)
-    print_output(f"ARP Cache Cleaned", FUNC)
+    print_output(f"ARP Cache Cleaned", INFO)
+    logger.info(f"[FIXED] ARP Cache cleaned")
