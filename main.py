@@ -1,9 +1,9 @@
 #! /usr/bin/python3
 
 from scapy.all import *
-from Helpers.sniff_helper import sniffer_helper
+
+import Helpers.parallel_helper as ph
 
 
 if __name__ == '__main__':
-    snh = sniffer_helper()
-    sniff(prn=snh.sniffer_func)
+    sniff(prn=ph.chain)
