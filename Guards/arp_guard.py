@@ -6,7 +6,7 @@ from scapy.layers.l2 import ARP, Ether
 from scapy.sendrecv import srp
 
 from Helpers.log_helper import logger
-from Helpers.output_helper import print_output, WARN, FUNC, INFO
+from Helpers.output_helper import print_output, WARN, FUNC, INFO, NOTF
 
 
 def is_all_equal(iterable):
@@ -34,7 +34,7 @@ def spoof_guard(pkt):
 
 
 def arp_fix(ip):
-    print_output(f"Cleaning ARP Cache", FUNC)
+    print_output(f"Cleaning ARP Cache", NOTF)
     logger.info(f"[FUNC] Begun ARP Cleaner")
     ip_entries = []
     arp_table = ARPTABLE
@@ -50,5 +50,5 @@ def arp_fix(ip):
         logger.critical(f"[ARP ATTACK] ARP HAS BEEN POISONED")
 
     result = subprocess.run('arp -d ' + ip, capture_output=True, text=True, shell=True)
-    print_output(f"ARP Cache Cleaned", INFO)
+    print_output(f"ARP Cache Cleaned", NOTF)
     logger.info(f"[FIXED] ARP Cache cleaned")
