@@ -9,8 +9,7 @@ from Helpers.ip_helper import process_IP_packet
 from Helpers.log_helper import logger
 
 from Guards.arp_guard import spoof_guard
-from Guards.ddos_guard import flood_guard, dos_guard, timed_check
-
+from Guards.ddos_guard import ddos_guard
 
 class sniffer_helper:
     ip_list = []
@@ -19,13 +18,12 @@ class sniffer_helper:
     def __init__(self):
         pass
 
-
-
-    def sniffer_func(self, pkt):
+    @staticmethod
+    def sniffer_func(pkt):
         logger.info("[SNIFFER] Packet analysis started")
         wrpcap('PCAP_LOG.pcap', pkt, append=True)
 
-        self.pkt_count += 1
+        ddos_guard.flood_guard(pkt)
 
         if ARP in pkt:
             spoof_guard(pkt)
