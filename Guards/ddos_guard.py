@@ -1,17 +1,16 @@
-import threading
+import sched
 import time
 from collections import Counter
 
-import schedule
 from scapy.layers.inet import TCP, IP
 
-from Helpers import sniffer_helper as snh
 from Helpers.output_helper import print_output, WARN
 
 count = Counter({})
 ip_list = []
 payload_lst = []
 
+s = sched.scheduler(time.time, time.sleep)
 
 def isBadPkt(pkt):
     bad = True if TCP in pkt and pkt[TCP].flags & 2 else False
@@ -32,18 +31,4 @@ def dos_guard():
         print_output(f"POSSIBLE DDOS ATTACK: Number of (Identified) bad pkts: {len(ip_list)}", WARN)
 
     snh.pkt_count = 0
-
-
-def timed_check():
-    cease_continuous_run = threading.Event()
-
-    class ScheduleThread(threading.Thread):
-        @classmethod
-        def run(cls):
-            while not cease_continuous_run.is_set():
-                schedule.run_pending()
-                time.sleep(1)
-
-    continuous_thread = ScheduleThread()
-    continuous_thread.start()
-    return cease_continuous_run
+    s.enter(1, 1, dos_guard, ())

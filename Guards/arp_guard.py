@@ -6,7 +6,7 @@ from scapy.layers.l2 import ARP, Ether
 from scapy.sendrecv import srp
 
 from Helpers.log_helper import logger
-from Helpers.output_helper import print_output, WARN, FUNC, INFO, NOTF
+from Helpers.output_helper import print_output, WARN, NOTF
 
 
 def is_all_equal(iterable):
