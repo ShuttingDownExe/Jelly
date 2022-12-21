@@ -1,17 +1,12 @@
-import subprocess
-from collections import Counter
-
 import threading
 import time
-import schedule
+from collections import Counter
 
+import schedule
 from scapy.layers.inet import TCP, IP
 
 from Helpers import sniffer_helper as snh
-
-from Helpers.log_helper import logger
-from Helpers.output_helper import print_output, WARN, FUNC, INFO
-from Helpers import sniffer_helper as snh
+from Helpers.output_helper import print_output, WARN
 
 count = Counter({})
 ip_list = []
@@ -30,6 +25,7 @@ def flood_guard(pkt):
 
     count.update(payload_lst)
 
+
 def dos_guard():
     print("ddos guard")
     if snh.pkt_count > 100:
@@ -37,8 +33,10 @@ def dos_guard():
 
     snh.pkt_count = 0
 
+
 def timed_check():
     cease_continuous_run = threading.Event()
+
     class ScheduleThread(threading.Thread):
         @classmethod
         def run(cls):

@@ -1,15 +1,12 @@
-import schedule
-from scapy.layers.inet import IP
 from scapy.layers.http import HTTPRequest
+from scapy.layers.inet import IP
 from scapy.layers.l2 import ARP
 from scapy.utils import wrpcap
 
+from Guards.arp_guard import spoof_guard
 from Helpers.http_helper import process_HTTP_packet
 from Helpers.ip_helper import process_IP_packet
 from Helpers.log_helper import logger
-
-from Guards.arp_guard import spoof_guard
-from Guards.ddos_guard import flood_guard, dos_guard, timed_check
 
 
 class sniffer_helper:
@@ -18,8 +15,6 @@ class sniffer_helper:
 
     def __init__(self):
         pass
-
-
 
     def sniffer_func(self, pkt):
         logger.info("[SNIFFER] Packet analysis started")
