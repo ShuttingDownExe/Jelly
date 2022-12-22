@@ -13,7 +13,7 @@ def clean():
 
 def chain(pkt):
     if len(process_list) < 20:
-        process_list.append(multiprocessing.Process(target= snh.sniffer_func ,args=(snh, pkt)))
+        process_list.append(multiprocessing.Process(target= snh.sniffer_func ,args=(pkt)))
         process_list[len(process_list) - 1].start()
     else:
         clean()
