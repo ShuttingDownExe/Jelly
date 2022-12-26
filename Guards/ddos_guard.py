@@ -22,16 +22,16 @@ def flood_guard(pkt):
         ddos_guard.ip_list.append(str(pkt[IP].src))
 
     ddos_guard.count.update(ddos_guard.payload_lst)
-    print(ddos_guard.pkt_count)
     ddos_guard.pkt_count+=1
-    print(ddos_guard.pkt_count)
 
 
 def count_packet():
-    print(f"count packet: {ddos_guard.pkt_count}")
+    print( "========================================")
+    print(f"==count packet: {ddos_guard.pkt_count}==")
+    print( "========================================")
     if ddos_guard.pkt_count > 700:
         print_output(f"POSSIBLE DDOS ATTACK: Number of (Identified) bad pkts: {len(ddos_guard.ip_list)}", WARN)
 
-    #ddos_guard.pkt_count = 0
+    ddos_guard.pkt_count = 0
     threading.Timer(1.0, count_packet).start()
     
