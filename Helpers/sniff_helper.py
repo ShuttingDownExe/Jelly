@@ -4,7 +4,6 @@ from scapy.layers.l2 import ARP
 from scapy.utils import wrpcap
 
 from Guards.arp_guard import spoof_guard
-from Guards.ddos_guard import flood_guard, count_packet
 
 from Helpers.http_helper import process_HTTP_packet
 from Helpers.ip_helper import process_IP_packet
@@ -22,8 +21,6 @@ class sniffer_helper:
     def sniffer_func(pkt):
         logger.info("[SNIFFER] Packet analysis started")
         wrpcap('PCAP_LOG.pcap', pkt, append=True)
-
-        flood_guard(pkt)
 
         if ARP in pkt:
             spoof_guard(pkt)
