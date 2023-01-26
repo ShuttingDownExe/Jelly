@@ -3,6 +3,7 @@ from collections import Counter
 from scapy.layers.inet import TCP, IP
 
 from Helpers.output_helper import print_output, WARN
+from Helpers.log_helper import logger
 
 import threading
 
@@ -30,6 +31,7 @@ def flood_guard(pkt):
 def count_packet():
     if ddos_guard.pkt_count > 5:
         print_output(f"POSSIBLE DDOS ATTACK: Number of (Identified) bad pkts: {ddos_guard.pkt_count}", WARN)
+        logger.warn(f"POSSIBLE DDOS ATTACK: Number of (Identified) bad pkts: {ddos_guard.pkt_count}")
 
     ddos_guard.pkt_count = 0
     threading.Timer(1.0, count_packet).start()
