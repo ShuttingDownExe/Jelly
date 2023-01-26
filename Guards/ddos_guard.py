@@ -28,7 +28,7 @@ def flood_guard(pkt):
 
 
 def count_packet():
-    if ddos_guard.pkt_count > 10:
+    if ddos_guard.pkt_count > 5:
         print_output(f"POSSIBLE DDOS ATTACK: Number of (Identified) bad pkts: {ddos_guard.pkt_count}", WARN)
 
     ddos_guard.pkt_count = 0
